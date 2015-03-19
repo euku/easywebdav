@@ -52,6 +52,7 @@ class OperationFailed(WebdavException):
         DELETE = "delete",
         MKCOL = "create directory",
         PROPFIND = "list directory",
+        MOVE = "move file",
         )
 
     def __init__(self, method, path, expected_code, actual_code):
@@ -148,6 +149,9 @@ class Client(object):
 
     def delete(self, path):
         self._send('DELETE', path, 204)
+
+    def move(self, path, new_path):
+        self._send('MOVE', path, 204,headers={"Destination":new_path,'Connection':'TE','TE':'trailers','Overwrite':'T'})
 
     def upload(self, local_path_or_fileobj, remote_path):
         if isinstance(local_path_or_fileobj, basestring):
