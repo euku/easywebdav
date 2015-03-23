@@ -9,9 +9,10 @@ py_majversion, py_minversion, py_revversion = platform.python_version_tuple()
 if py_majversion == '2':
     from httplib import responses as HTTP_CODES
     from urlparse import urlparse
+    from urllib import quote 
 else:
     from http.client import responses as HTTP_CODES
-    from urllib.parse import urlparse
+    from urllib.parse import urlparse, quote
 
 DOWNLOAD_CHUNK_SIZE_BYTES = 1 * 1024 * 1024
 
@@ -101,7 +102,7 @@ class Client(object):
         return response
 
     def _get_url(self, path):
-        path = str(path).strip()
+        path = quote(str(path).strip())
         if path.startswith('/'):
             return self.baseurl + path
         return "".join((self.baseurl, self.cwd, path))
