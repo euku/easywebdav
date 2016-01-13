@@ -18,6 +18,9 @@ else:
 
 DOWNLOAD_CHUNK_SIZE_BYTES = 1 * 1024 * 1024
 
+AUTH_MODE_BASIC = 'basic'
+AUTH_MODE_DIGEST = 'digest'
+
 class WebdavException(Exception):
     pass
 
@@ -85,7 +88,7 @@ class OperationFailed(WebdavException):
 
 class Client(object):
     def __init__(self, host, port=0, auth=None, username=None, password=None,
-                 protocol='http', verify_ssl=True, path=None, cert=None):
+                 protocol='http', verify_ssl=True, path=None, cert=None, auth_mode=AUTH_MODE_BASIC):
         if not port:
             port = 443 if protocol == 'https' else 80
         self.baseurl = '{0}://{1}:{2}'.format(protocol, host, port)
@@ -102,7 +105,10 @@ class Client(object):
         if auth:
             self.session.auth = auth
         elif username and password:
-            self.session.auth = (username, password)
+          if auth_mode == AUTH_MODE_DIGEST:
+            self.session.auth = requests.auth.HTTPDigestAuth(username, password)
+          else:
+            self.session.auth = (username, password)          
 
     def _send(self, method, path, expected_code, **kwargs):
         url = self._get_url(path)
@@ -205,3 +211,4 @@ class Client(object):
         response = self._send('HEAD', remote_path, (200, 301, 404))
         response.content
         return True if response.status_code != 404 else False
+
