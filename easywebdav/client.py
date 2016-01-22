@@ -143,11 +143,11 @@ class Client(object):
 
     def rmdir(self, path, safe=False):
         path = str(path).rstrip('/') + '/'
-        expected_codes = 204 if not safe else (204, 404)
+        expected_codes = (200, 204) if not safe else (200, 204, 404)
         self._send('DELETE', path, expected_codes)
 
     def delete(self, path):
-        self._send('DELETE', path, 204)
+        self._send('DELETE', path, (200, 204))
 
     def upload(self, local_path_or_fileobj, remote_path):
         if isinstance(local_path_or_fileobj, basestring):
