@@ -164,15 +164,15 @@ class Client(object):
     def move(self, path, new_path):
         self._send('MOVE', path, 204,headers={"Destination":new_path,'Connection':'TE','TE':'trailers','Overwrite':'T'})
 
-    def upload(self, local_path_or_fileobj, remote_path):
+    def upload(self, local_path_or_fileobj, remote_path, headers=None):
         if isinstance(local_path_or_fileobj, basestring):
             with open(local_path_or_fileobj, 'rb') as f:
-                self._upload(f, remote_path)
+                self._upload(f, remote_path, headers)
         else:
-            self._upload(local_path_or_fileobj, remote_path)
+            self._upload(local_path_or_fileobj, remote_path, headers)
 
-    def _upload(self, fileobj, remote_path):
-        self._send('PUT', remote_path, (200, 201, 204), data=fileobj)
+    def _upload(self, fileobj, remote_path, headers):
+        self._send('PUT', remote_path, (200, 201, 204), data=fileobj, headers=headers)
 
     def download(self, remote_path, local_path_or_fileobj, callback = None):
         response = self._send('GET', remote_path, 200, stream=True)
