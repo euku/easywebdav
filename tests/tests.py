@@ -151,3 +151,23 @@ class Tests(TestCase):
         sio.seek(0)
         self.client.upload(sio, 'file')
         self._assert_file('file', self.content)
+
+
+    def test__move(self):
+        path = self._local_file(self.content)
+        self.client.upload(path, 'file')
+        self.client.move(path, 'file', 'filemove')
+        self._assert_file('filemove', self.content)
+    def test__move_nested(self):
+        path = self._local_file(self.content)
+        self._create_dir('one')
+        self.client.upload(path, 'one/file')
+        self.client.move(path, 'one/file', 'one/filemove')
+        self._assert_file('one/filemove', self.content)
+    def test__move_nested_absolute(self):
+        path = self._local_file(self.content)
+        self._create_dir('one', 'two')
+        self.client.cd('one')
+        self.client.upload(path, '/two/file')
+        self.client.move(path, '/two/file', '/two/filemove')
+        self._assert_file('two/filemove', self.content)
