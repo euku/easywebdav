@@ -169,17 +169,20 @@ class Client(object):
     def _upload(self, fileobj, remote_path):
         self._send('PUT', remote_path, (200, 201, 204), data=fileobj)
 
-    def download(self, remote_path, local_path_or_fileobj):
+    def download(self, remote_path, local_path_or_fileobj, callback = None):
         response = self._send('GET', remote_path, 200, stream=True)
         if isinstance(local_path_or_fileobj, basestring):
             with open(local_path_or_fileobj, 'wb') as f:
-                self._download(f, response)
+                self._download(f, response, callback)
         else:
-            self._download(local_path_or_fileobj, response)
+            self._download(local_path_or_fileobj, response, callback)
 
-    def _download(self, fileobj, response):
+    def _download(self, fileobj, response, callback = None):
         for chunk in response.iter_content(DOWNLOAD_CHUNK_SIZE_BYTES):
             fileobj.write(chunk)
+            if not callback is None:
+                callback(len(chunk))
+
 
     def ls(self, remote_path='.'):
         headers = {'Depth': '1'}
