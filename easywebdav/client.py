@@ -132,7 +132,7 @@ class Client(object):
 
     def mkdir(self, path, safe=False):
         expected_codes = 201 if not safe else (201, 301, 405)
-        self._send('MKCOL', path, expected_codes)
+        self._send('MKCOL', path, expected_codes).content
 
     def mkdirs(self, path):
         dirs = [d for d in path.split('/') if d]
@@ -156,13 +156,13 @@ class Client(object):
     def rmdir(self, path, safe=False):
         path = str(path).rstrip('/') + '/'
         expected_codes = (200, 204) if not safe else (200, 204, 404)
-        self._send('DELETE', path, expected_codes)
+        self._send('DELETE', path, expected_codes).content
 
     def delete(self, path):
-        self._send('DELETE', path, (200, 204))
+        self._send('DELETE', path, (200, 204)).content
 
     def move(self, path, new_path):
-        self._send('MOVE', path, 204,headers={"Destination":new_path,'Connection':'TE','TE':'trailers','Overwrite':'T'})
+        self._send('MOVE', path, 204,headers={"Destination":new_path,'Connection':'TE','TE':'trailers','Overwrite':'T'}).content
 
     def upload(self, local_path_or_fileobj, remote_path, headers=None):
         if isinstance(local_path_or_fileobj, basestring):
@@ -172,7 +172,7 @@ class Client(object):
             self._upload(local_path_or_fileobj, remote_path, headers)
 
     def _upload(self, fileobj, remote_path, headers):
-        self._send('PUT', remote_path, (200, 201, 204), data=fileobj, headers=headers)
+        self._send('PUT', remote_path, (200, 201, 204), data=fileobj, headers=headers).content
 
     def download(self, remote_path, local_path_or_fileobj, callback = None):
         response = self._send('GET', remote_path, 200, stream=True)
@@ -203,4 +203,5 @@ class Client(object):
 
     def exists(self, remote_path):
         response = self._send('HEAD', remote_path, (200, 301, 404))
+        response.content
         return True if response.status_code != 404 else False
