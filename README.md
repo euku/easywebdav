@@ -40,6 +40,7 @@ The API is pretty much self-explanatory:
     exists(remote_path)
     mkdir(path, safe=False)
     mkdirs(path)
+    move(path, new_path)
     rmdir(path, safe=False)
     delete(file_path)
     upload(local_path_or_fileobj, remote_path)
