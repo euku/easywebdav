@@ -162,7 +162,7 @@ class Client(object):
         self._send('DELETE', path, (200, 204)).content
 
     def move(self, path, new_path):
-        self._send('MOVE', path, 204,headers={"Destination":new_path,'Connection':'TE','TE':'trailers','Overwrite':'T'}).content
+        self._send('MOVE', path, (201, 204),headers={"Destination":new_path,'Connection':'TE','TE':'trailers','Overwrite':'T'}).content
 
     def upload(self, local_path_or_fileobj, remote_path, headers=None):
         if isinstance(local_path_or_fileobj, basestring):
