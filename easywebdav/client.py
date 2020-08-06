@@ -9,17 +9,19 @@ py_majversion, py_minversion, py_revversion = platform.python_version_tuple()
 if py_majversion == '2':
     from httplib import responses as HTTP_CODES
     from urlparse import urlparse
-    from urllib import quote 
+    from urllib import quote
     basestring = basestring
 else:
     from http.client import responses as HTTP_CODES
     from urllib.parse import urlparse, quote
-    basestring = (str,bytes)
+    basestring = (str, bytes)
 
 DOWNLOAD_CHUNK_SIZE_BYTES = 1 * 1024 * 1024
 
+
 class WebdavException(Exception):
     pass
+
 
 class ConnectionFailed(WebdavException):
     pass
@@ -35,6 +37,7 @@ File = namedtuple('File', ['name', 'size', 'mtime', 'ctime', 'contenttype'])
 def prop(elem, name, default=None):
     child = elem.find('.//{DAV:}' + name)
     return default if child is None or not child.text else child.text
+
 
 def getrealcontenttype(elem):
     resource_type = elem.find('.//{DAV:}resourcetype')
@@ -57,14 +60,14 @@ def elem2file(elem):
 
 class OperationFailed(WebdavException):
     _OPERATIONS = dict(
-        HEAD = "get header",
-        GET = "download",
-        PUT = "upload",
-        DELETE = "delete",
-        MKCOL = "create directory",
-        PROPFIND = "list directory",
-        MOVE = "move file",
-        )
+        HEAD="get header",
+        GET="download",
+        PUT="upload",
+        DELETE="delete",
+        MKCOL="create directory",
+        PROPFIND="list directory",
+        MOVE="move file",
+    )
 
     def __init__(self, method, path, expected_code, actual_code):
         self.method = method
@@ -82,6 +85,7 @@ class OperationFailed(WebdavException):
   Expected code :  {expected_codes_str}
   Actual code   :  {actual_code} {actual_code_str}'''.format(**locals())
         super(OperationFailed, self).__init__(msg)
+
 
 class Client(object):
     def __init__(self, host, port=0, auth=None, username=None, password=None,
@@ -102,13 +106,20 @@ class Client(object):
         if auth:
             self.session.auth = auth
         elif username and password:
+<<<<<<< Updated upstream
             self.session.auth = (username, password)
+=======
+            if auth_mode == AUTH_MODE_DIGEST:
+                self.session.auth = requests.auth.HTTPDigestAuth(username, password)
+            else:
+                self.session.auth = (username, password)
+>>>>>>> Stashed changes
 
     def _send(self, method, path, expected_code, **kwargs):
         url = self._get_url(path)
         response = self.session.request(method, url, allow_redirects=False, **kwargs)
         if isinstance(expected_code, Number) and response.status_code != expected_code \
-            or not isinstance(expected_code, Number) and response.status_code not in expected_code:
+           or not isinstance(expected_code, Number) and response.status_code not in expected_code:
             raise OperationFailed(method, path, expected_code, response.status_code)
         return response
 
@@ -162,7 +173,7 @@ class Client(object):
         self._send('DELETE', path, (200, 204)).content
 
     def move(self, path, new_path):
-        self._send('MOVE', path, 204,headers={"Destination":new_path,'Connection':'TE','TE':'trailers','Overwrite':'T'}).content
+        self._send('MOVE', path, 204, headers={"Destination": new_path, 'Connection': 'TE', 'TE': 'trailers', 'Overwrite': 'T'}).content
 
     def upload(self, local_path_or_fileobj, remote_path, headers=None):
         if isinstance(local_path_or_fileobj, basestring):
@@ -174,7 +185,7 @@ class Client(object):
     def _upload(self, fileobj, remote_path, headers):
         self._send('PUT', remote_path, (200, 201, 204), data=fileobj, headers=headers).content
 
-    def download(self, remote_path, local_path_or_fileobj, callback = None):
+    def download(self, remote_path, local_path_or_fileobj, callback=None):
         response = self._send('GET', remote_path, 200, stream=True)
         if isinstance(local_path_or_fileobj, basestring):
             with open(local_path_or_fileobj, 'wb') as f:
@@ -182,10 +193,10 @@ class Client(object):
         else:
             self._download(local_path_or_fileobj, response, callback)
 
-    def _download(self, fileobj, response, callback = None):
+    def _download(self, fileobj, response, callback=None):
         for chunk in response.iter_content(DOWNLOAD_CHUNK_SIZE_BYTES):
             fileobj.write(chunk)
-            if not callback is None:
+            if callback is not None:
                 callback(len(chunk))
 
 
